@@ -84,6 +84,7 @@ not part of NRS³.
 | 1925–27 | Pauli: exclusion, shells `2n²`, spin matrices | [`nrs3-pauli-dirac`](https://github.com/naype888-cloud/nrs3-pauli-dirac) |
 | 1927–32 | von Neumann: the entropy of a quantum state; Klein's inequality (1931) | **[`nrs3-landauer-carnot`](https://github.com/naype888-cloud/nrs3-landauer-carnot)** (this one) |
 | 1928 | Dirac: the `4 × 4` gamma matrices | [`nrs3-pauli-dirac`](https://github.com/naype888-cloud/nrs3-pauli-dirac) |
+| 1929 | van der Waerden: spinors, `SL(2, ℂ)` on Hermitian matrices; the uncertainty cone | [`nrs3-uncertainty-cone`](https://github.com/naype888-cloud/nrs3-uncertainty-cone) |
 | **1929–30** | **Robertson and Schrödinger: the uncertainty inequality** | **[base repository (NRS, NRS³)](https://github.com/naype888-cloud/nava-robertson-schrodinger)** |
 | 1945–46 | Mandelstam–Tamm: the time–energy bound; Rao (1945), Cramér (1946) | [`nrs3-mandelstam-tamm-cramer-rao`](https://github.com/naype888-cloud/nrs3-mandelstam-tamm-cramer-rao) |
 
@@ -99,6 +100,7 @@ Physlib are the verification.
 - [NRS³ · de Sitter](https://github.com/naype888-cloud/nrs3-de-sitter)
 - [NRS³ · Penrose](https://github.com/naype888-cloud/nrs3-penrose) (proposal)
 - [NRS³ · Pauli–Dirac](https://github.com/naype888-cloud/nrs3-pauli-dirac)
+- [NRS³ · The uncertainty cone](https://github.com/naype888-cloud/nrs3-uncertainty-cone)
 - [NRS³ · Poincaré](https://github.com/naype888-cloud/nrs3-poincare)
 - [NRS³ · Defect and curvature](https://github.com/naype888-cloud/nrs3-defect-curvature)
 - [NRS³ · Rovelli — Loop Quantum Gravity](https://github.com/naype888-cloud/nrs3-rovelli-lqg) (proposal)
