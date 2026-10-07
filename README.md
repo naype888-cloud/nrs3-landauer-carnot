@@ -57,6 +57,8 @@ allows, at most `log d`, and is passive — nothing left to distinguish, no work
 | Statement | Lean |
 |---|---|
 | light cone `⟨m| H^k |n⟩ = 0` for `|m − n| > k` | `inner_pow_openHamiltonian_eq_zero` |
+| the front on time, `⟨n + k| H^k |n⟩ = (−t)^k` | `inner_pow_openHamiltonian_front` |
+| window of an event: nothing before step `r`, nonzero at step `r` | `event_window` |
 | nested packets | `inner_pow_openHamiltonian_front_eq_zero` |
 | Gibbs: most entropy at fixed energy, `≤ log d`, passive | `MState.gibbsState_end_of_count` |
 

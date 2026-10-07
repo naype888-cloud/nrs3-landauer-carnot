@@ -110,7 +110,9 @@ td.name { font-family: var(--mono); font-size: .82rem; color: var(--accent); whi
     <div class="plot"><div class="cap">Entropía del estado de Gibbs de la cadena según β: sube hacia log d cuando β → 0 y nunca lo pasa.</div><div class="chart" id="gibbs"></div></div>
   </section>
 
-  <p class="note">El orden de salida queda grabado en el orden de llegada: ningún paquete rebasa a otro en c. Y el conteo tiene
+  <p class="note">Un evento empieza, transcurre y termina: en un sitio a distancia r se registra exactamente desde el
+    paso r, nunca antes (el frente llega con amplitud (−t)<sup>r</sup>), y deja de distinguirse cuando el calor alcanza
+    el estado de Gibbs, nunca después. El orden de salida queda grabado en el orden de llegada: ningún paquete rebasa a otro en c. Y el conteo tiene
     techo: en una celda finita las diferencias se agotan, el estado de Gibbs es pasivo y la información termina su
     viaje. No es que se destruya, la evolución es unitaria; es que ya no queda nada que distinguir ni que extraer.</p>
 
@@ -120,6 +122,8 @@ td.name { font-family: var(--mono); font-size: .82rem; color: var(--accent); whi
       <thead><tr><th>Enunciado</th><th>Lean</th><th></th></tr></thead>
       <tbody>
         <tr><td>cono de luz: ⟨m| H^k |n⟩ = 0 si |m − n| &gt; k</td><td class="name">inner_pow_openHamiltonian_eq_zero</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>el frente llega a tiempo: ⟨n + k| H^k |n⟩ = (−t)^k</td><td class="name">inner_pow_openHamiltonian_front</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>ventana del evento: a distancia r, nada antes del paso r y amplitud ≠ 0 en el paso r</td><td class="name">event_window</td><td><span class="pill">probado</span></td></tr>
         <tr><td>paquetes anidados: el de atrás no toca el frente del de adelante</td><td class="name">inner_pow_openHamiltonian_front_eq_zero</td><td><span class="pill">probado</span></td></tr>
         <tr><td>a igual energía, γ tiene la máxima entropía; S(γ) ≤ log d; γ es pasivo</td><td class="name">gibbsState_end_of_count</td><td><span class="pill">probado</span></td></tr>
       </tbody>

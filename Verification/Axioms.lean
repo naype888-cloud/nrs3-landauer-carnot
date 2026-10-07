@@ -19,3 +19,5 @@ import NRS3LandauerCarnot
 #print axioms CondensedMatter.TightBindingChain.inner_pow_openHamiltonian_eq_zero
 #print axioms CondensedMatter.TightBindingChain.inner_pow_openHamiltonian_front_eq_zero
 #print axioms MState.gibbsState_end_of_count
+#print axioms CondensedMatter.TightBindingChain.inner_pow_openHamiltonian_front
+#print axioms CondensedMatter.TightBindingChain.event_window
