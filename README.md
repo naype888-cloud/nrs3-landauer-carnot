@@ -46,6 +46,22 @@ entropy took (Szilard 1929, Landauer 1961).
 
 The same file is in Physlib as `PhyslibAlpha/CondensedMatter/TightBindingChain/PathEntropy.lean`.
 
+## Nested packets and the end of the count
+
+The open chain hops only between neighbours, so after `k` steps nothing connects sites more than
+`k` apart: `⟨m| H^k |n⟩ = 0` for `|m − n| > k`. Two packets emitted from the same site `m ≥ 1`
+steps apart are nested, and the later one never reaches the front of the earlier one: both are
+capped at the speed limit. The count ends: the Gibbs state holds the most entropy its mean energy
+allows, at most `log d`, and is passive — nothing left to distinguish, no work left to extract.
+
+| Statement | Lean |
+|---|---|
+| light cone `⟨m| H^k |n⟩ = 0` for `|m − n| > k` | `inner_pow_openHamiltonian_eq_zero` |
+| nested packets | `inner_pow_openHamiltonian_front_eq_zero` |
+| Gibbs: most entropy at fixed energy, `≤ log d`, passive | `MState.gibbsState_end_of_count` |
+
+**[▶ Pruébalo (español): paquetes topados en c y el fin del conteo](https://naype888-cloud.github.io/nrs3-landauer-carnot/fin.html)**
+
 ## Kelvin–Planck and Carnot
 
 ![NRS³ · Carnot](docs/figures/carnot_efficiency.png)

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El fin del viaje</title>
+<meta name="description" content="Paquetes anidados topados en c y el fin del conteo: el estado de Gibbs guarda la máxima entropía, a lo más log d, y es pasivo.">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+/* Layout: one instrument column — control strip on top, live readouts, three linked plots, then the Lean ledger and the static figures. */
+:root {
+  --bg: #fcfcfb; --panel: #ffffff; --fg: #0b0b0b; --mut: #52514e; --line: #e4e3df;
+  --accent: #2a78d6; --warm: #eb6834; --ok: #1f7a4d; --code: #f1f0ec;
+  --display: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111110; --panel: #191918; --fg: #f2f1ee; --mut: #c4c3bf; --line: #2c2b29;
+  --accent: #5b9be6; --warm: #f08a5d; --ok: #5cc98f; --code: #1f1f1d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111110; --panel: #191918; --fg: #f2f1ee; --mut: #c4c3bf; --line: #2c2b29;
+  --accent: #5b9be6; --warm: #f08a5d; --ok: #5cc98f; --code: #1f1f1d; color-scheme: dark }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.meta a { color: var(--accent); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 28px; }
+h1, h2 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; }
+h2 { font-size: 1.3rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font: 600 .74rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+header { display: grid; gap: 10px; }
+.formula { font-family: var(--mono); font-size: 1.05rem; color: var(--accent); }
+.mut { color: var(--mut); }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+code { background: var(--code); padding: 1px 5px; border-radius: 4px; }
+
+.controls { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; }
+.ctl-row label { font-weight: 600; }
+input[type="range"] { flex: 1 1 320px; min-width: 0; accent-color: var(--accent); }
+.sval { font-family: var(--mono); font-variant-numeric: tabular-nums; min-width: 12ch; }
+button, .seg label { font: 600 .9rem var(--body); border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+button:hover, .seg label:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible + label, input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; gap: 6px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.ro { background: var(--panel); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ro .k { font: 600 .72rem var(--mono); color: var(--mut); letter-spacing: .04em; }
+.ro .v { font: 500 1.05rem var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ro .u { font-size: .8rem; color: var(--mut); overflow-wrap: anywhere; }
+.ro.check .v { color: var(--ok); }
+
+.plots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 18px; }
+.plot { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px; min-width: 0; }
+.plot .cap { font: .78rem var(--mono); color: var(--mut); padding: 2px 6px 6px; overflow-wrap: anywhere; }
+.plot .chart { width: 100%; height: 340px; }
+.plot.wide { grid-column: 1 / -1; }
+
+.ledger { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: .92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .74rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--mut); }
+tr:last-child td { border-bottom: 0; }
+td.name { font-family: var(--mono); font-size: .82rem; color: var(--accent); white-space: nowrap; }
+.pill { font: 600 .72rem var(--mono); color: var(--ok); border: 1px solid var(--ok); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font: .82rem var(--mono); color: var(--mut); }
+
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; }
+.figs figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+.figs img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.figs figcaption { font-size: .82rem; color: var(--mut); padding: 6px 4px 2px; }
+.note { border-left: 3px solid var(--warm); padding: 4px 0 4px 14px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<body>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">NRS³ · Landauer · el fin del viaje de la información</div>
+    <h1>Paquetes topados en c y el fin del conteo</h1>
+    <p class="formula">⟨m| H<sup>k</sup> |n⟩ = 0 si |m − n| &gt; k &nbsp;·&nbsp; S(σ) ≤ S(γ) ≤ log d &nbsp;·&nbsp; γ pasivo</p>
+    <p>La cadena solo salta entre vecinos: después de k pasos nada conecta sitios a más de k de distancia. Dos paquetes
+      que salen del mismo sitio con m pasos de diferencia quedan anidados: el de atrás nunca alcanza el frente del de
+      adelante, porque los dos están topados en c. Y el viaje termina: el estado de Gibbs guarda la máxima entropía que
+      permite su energía, a lo más log d, y es pasivo; ya no hay nada que contar ni trabajo que sacar.</p>
+    <div class="meta"><a href="https://github.com/naype888-cloud/nrs3-landauer-carnot">código Lean</a>
+      <a href="./">Landauer</a><a href="carnot.html">Carnot</a><a href="caminos.html">entropía de caminos</a></div>
+  </header>
+
+  <section class="controls" aria-label="Controles">
+    <div class="ctl-row"><label for="N">sitios N</label><input id="N" type="range" min="4" max="41" step="1" value="25"><span class="sval" id="Nv"></span></div>
+    <div class="ctl-row"><label for="m">retraso del segundo paquete m</label><input id="m" type="range" min="1" max="10" step="1" value="3"><span class="sval" id="mv"></span></div>
+    <div class="ctl-row"><label for="b">temperatura inversa β · t</label><input id="b" type="range" min="-2" max="1.5" step="0.01" value="0"><span class="sval" id="bv"></span></div>
+  </section>
+
+  <section class="readouts" aria-live="polite">
+    <div class="ro"><span class="k">frente del primero, paso k</span><span class="v" id="ro-f"></span><span class="u">|Δ| = k</span></div>
+    <div class="ro check"><span class="k">amplitud del segundo en ese frente</span><span class="v" id="ro-a"></span><span class="u">exactamente 0</span></div>
+    <div class="ro"><span class="k">S(γ)</span><span class="v" id="ro-s"></span><span class="u" id="ro-su"></span></div>
+    <div class="ro"><span class="k">log d</span><span class="v" id="ro-l"></span><span class="u">techo del conteo</span></div>
+    <div class="ro check"><span class="k">trabajo extraíble de γ</span><span class="v">0</span><span class="u">pasivo (Kelvin–Planck)</span></div>
+  </section>
+
+  <section class="plots">
+    <div class="plot"><div class="cap">|⟨j| H^k |centro⟩| normalizado por paso, para el primer paquete (izquierda del cero) y el segundo, con m pasos de retraso. Fuera del cono es cero exacto.</div><div class="chart" id="cones"></div></div>
+    <div class="plot"><div class="cap">Entropía del estado de Gibbs de la cadena según β: sube hacia log d cuando β → 0 y nunca lo pasa.</div><div class="chart" id="gibbs"></div></div>
+  </section>
+
+  <p class="note">El orden de salida queda grabado en el orden de llegada: ningún paquete rebasa a otro en c. Y el conteo tiene
+    techo: en una celda finita las diferencias se agotan, el estado de Gibbs es pasivo y la información termina su
+    viaje. No es que se destruya, la evolución es unitaria; es que ya no queda nada que distinguir ni que extraer.</p>
+
+  <section>
+    <h2>Cada valor y su teorema</h2>
+    <div class="ledger"><table>
+      <thead><tr><th>Enunciado</th><th>Lean</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>cono de luz: ⟨m| H^k |n⟩ = 0 si |m − n| &gt; k</td><td class="name">inner_pow_openHamiltonian_eq_zero</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>paquetes anidados: el de atrás no toca el frente del de adelante</td><td class="name">inner_pow_openHamiltonian_front_eq_zero</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>a igual energía, γ tiene la máxima entropía; S(γ) ≤ log d; γ es pasivo</td><td class="name">gibbsState_end_of_count</td><td><span class="pill">probado</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const cfg = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+  function layout(xt, yt, extra) {
+    const fg = css("--fg"), mut = css("--mut"), line = css("--line");
+    const ax = t => ({ title: { text: t, font: { color: fg, size: 12 } }, gridcolor: line, zerolinecolor: line, linecolor: mut, tickfont: { color: mut, size: 11 } });
+    return Object.assign({ paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: { family: "system-ui, sans-serif", color: fg },
+      margin: { l: 60, r: 20, t: 10, b: 50 }, xaxis: ax(xt), yaxis: ax(yt), showlegend: true,
+      legend: { orientation: "h", y: -0.25, font: { size: 11, color: fg } } }, extra || {});
+  }
+  // H = -t (hop) with E0 = 0, t = 1, open chain; apply to a vector
+  function applyH(v) { const n = v.length, w = new Float64Array(n); for (let i = 0; i < n; i++) { if (i > 0) w[i] -= v[i - 1]; if (i < n - 1) w[i] -= v[i + 1]; } return w; }
+  function rows(N, kmax, delay) {
+    const c = Math.floor(N / 2), z = [];
+    let v = new Float64Array(N); v[c] = 1;
+    for (let k = 0; k <= kmax; k++) {
+      const kk = k - delay; let row;
+      if (kk < 0) row = new Array(N).fill(null);
+      else { let u = new Float64Array(N); u[c] = 1; for (let s = 0; s < kk; s++) u = applyH(u); const mx = Math.max(...u.map(Math.abs)) || 1; row = Array.from(u, x => Math.abs(x) / mx); }
+      z.push(row);
+    }
+    return z;
+  }
+  function gibbsEntropy(N, beta) {
+    const E = []; for (let k = 1; k <= N; k++) E.push(-2 * Math.cos(k * Math.PI / (N + 1)));
+    const m = Math.min(...E.map(e => beta * e)); const w = E.map(e => Math.exp(-(beta * e - m)));
+    const Z = w.reduce((a, b) => a + b, 0); let S = 0; for (const x of w) { const p = x / Z; if (p > 0) S -= p * Math.log(p); } return S;
+  }
+  function draw() {
+    const N = +$("N").value, m = +$("m").value, lb = +$("b").value, beta = Math.pow(10, lb);
+    $("Nv").textContent = N; $("mv").textContent = m; $("bv").textContent = beta.toFixed(3);
+    const kmax = Math.floor(N / 2), c = Math.floor(N / 2);
+    const z1 = rows(N, kmax, 0), z2 = rows(N, kmax, m);
+    const sites = Array.from({ length: N }, (_, i) => i - c), ks = Array.from({ length: kmax + 1 }, (_, i) => i);
+    const k = kmax; const front = c + k < N ? c + k : c - k;
+    let u = new Float64Array(N); u[c] = 1; for (let s = 0; s < k - m; s++) u = applyH(u);
+    $("ro-f").textContent = "k = " + k + ", sitio " + (front - c);
+    $("ro-a").textContent = Math.abs(u[front]).toExponential(1).replace("0.0e+0", "0");
+    const S = gibbsEntropy(N, beta), L = Math.log(N);
+    $("ro-s").textContent = S.toFixed(5); $("ro-su").textContent = "≤ log d siempre"; $("ro-l").textContent = L.toFixed(5);
+    const sc = [[0, css("--bg")], [1, css("--accent")]], sc2 = [[0, css("--bg")], [1, css("--warm")]];
+    Plotly.react("cones", [
+      { type: "heatmap", x: sites, y: ks, z: z1, colorscale: sc, showscale: false, name: "primero", xaxis: "x", yaxis: "y" },
+      { type: "heatmap", x: sites, y: ks, z: z2, colorscale: sc2, showscale: false, name: "segundo", xaxis: "x2", yaxis: "y" },
+      { type: "scatter", mode: "lines", x: [0, -kmax], y: [0, kmax], line: { color: css("--fg"), dash: "dot" }, showlegend: false, xaxis: "x", yaxis: "y" },
+      { type: "scatter", mode: "lines", x: [0, kmax], y: [0, kmax], line: { color: css("--fg"), dash: "dot" }, showlegend: false, xaxis: "x", yaxis: "y" },
+      { type: "scatter", mode: "lines", x: [0, -(kmax - m)], y: [m, kmax], line: { color: css("--fg"), dash: "dot" }, showlegend: false, xaxis: "x2", yaxis: "y" },
+      { type: "scatter", mode: "lines", x: [0, kmax - m], y: [m, kmax], line: { color: css("--fg"), dash: "dot" }, showlegend: false, xaxis: "x2", yaxis: "y" }
+    ], Object.assign(layout("sitio (primer paquete)", "paso k"), {
+      xaxis: Object.assign(layout("sitio · primero", "").xaxis, { domain: [0, 0.48] }),
+      xaxis2: Object.assign(layout("sitio · segundo (m pasos después)", "").xaxis, { domain: [0.52, 1], anchor: "y" }), showlegend: false }), cfg);
+    const bs = []; for (let x = -2; x <= 1.5001; x += 0.05) bs.push(Math.pow(10, x));
+    Plotly.react("gibbs", [
+      { type: "scatter", mode: "lines", name: "S(γ)", x: bs, y: bs.map(b => gibbsEntropy(N, b)), line: { color: css("--accent"), width: 2 } },
+      { type: "scatter", mode: "lines", name: "log d", x: [bs[0], bs[bs.length - 1]], y: [L, L], line: { color: css("--mut"), dash: "dot" } },
+      { type: "scatter", mode: "markers", name: "β elegida", x: [beta], y: [S], marker: { color: css("--warm"), size: 10 } }
+    ], layout("β · t", "S (nat)", { xaxis: Object.assign(layout("β · t", "").xaxis, { type: "log" }) }), cfg);
+  }
+  ["N", "m", "b"].forEach(id => $(id).addEventListener("input", draw));
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  draw();
+})();
+</script>
+</body>
+</html>

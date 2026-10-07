@@ -16,3 +16,6 @@ import NRS3LandauerCarnot
 #print axioms PathEntropy.one_lt_card_lightPath
 #print axioms PathEntropy.pathEntropy_pos
 #print axioms PathEntropy.landauer_pathEntropy
+#print axioms CondensedMatter.TightBindingChain.inner_pow_openHamiltonian_eq_zero
+#print axioms CondensedMatter.TightBindingChain.inner_pow_openHamiltonian_front_eq_zero
+#print axioms MState.gibbsState_end_of_count
