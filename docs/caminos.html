@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entropía de caminos</title>
+<meta name="description" content="La entropía de los caminos a la velocidad límite en el cubo: un solo camino sobre un eje, el multinomial en cuanto se mueven dos, y el calor de Landauer por borrar cuál camino se tomó.">
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+/* Layout: one instrument column — control strip on top, live readouts, three linked plots, then the Lean ledger and the static figures. */
+:root {
+  --bg: #fcfcfb; --panel: #ffffff; --fg: #0b0b0b; --mut: #52514e; --line: #e4e3df;
+  --accent: #2a78d6; --warm: #eb6834; --ok: #1f7a4d; --code: #f1f0ec;
+  --display: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111110; --panel: #191918; --fg: #f2f1ee; --mut: #c4c3bf; --line: #2c2b29;
+  --accent: #5b9be6; --warm: #f08a5d; --ok: #5cc98f; --code: #1f1f1d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #111110; --panel: #191918; --fg: #f2f1ee; --mut: #c4c3bf; --line: #2c2b29;
+  --accent: #5b9be6; --warm: #f08a5d; --ok: #5cc98f; --code: #1f1f1d; color-scheme: dark }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.meta a { color: var(--accent); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 28px; }
+h1, h2 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 700; }
+h2 { font-size: 1.3rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font: 600 .74rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mut); }
+header { display: grid; gap: 10px; }
+.formula { font-family: var(--mono); font-size: 1.05rem; color: var(--accent); }
+.mut { color: var(--mut); }
+code, .mono { font-family: var(--mono); font-size: .86em; }
+code { background: var(--code); padding: 1px 5px; border-radius: 4px; }
+
+.controls { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; }
+.ctl-row label { font-weight: 600; }
+input[type="range"] { flex: 1 1 320px; min-width: 0; accent-color: var(--accent); }
+.sval { font-family: var(--mono); font-variant-numeric: tabular-nums; min-width: 12ch; }
+button, .seg label { font: 600 .9rem var(--body); border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+button:hover, .seg label:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible + label, input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; gap: 6px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.ro { background: var(--panel); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ro .k { font: 600 .72rem var(--mono); color: var(--mut); letter-spacing: .04em; }
+.ro .v { font: 500 1.05rem var(--mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ro .u { font-size: .8rem; color: var(--mut); overflow-wrap: anywhere; }
+.ro.check .v { color: var(--ok); }
+
+.plots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: 18px; }
+.plot { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px; min-width: 0; }
+.plot .cap { font: .78rem var(--mono); color: var(--mut); padding: 2px 6px 6px; overflow-wrap: anywhere; }
+.plot .chart { width: 100%; height: 340px; }
+.plot.wide { grid-column: 1 / -1; }
+
+.ledger { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: .92rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .74rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--mut); }
+tr:last-child td { border-bottom: 0; }
+td.name { font-family: var(--mono); font-size: .82rem; color: var(--accent); white-space: nowrap; }
+.pill { font: 600 .72rem var(--mono); color: var(--ok); border: 1px solid var(--ok); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font: .82rem var(--mono); color: var(--mut); }
+
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; }
+.figs figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px; }
+.figs img { display: block; width: 100%; height: auto; border-radius: 6px; }
+.figs figcaption { font-size: .82rem; color: var(--mut); padding: 6px 4px 2px; }
+.note { border-left: 3px solid var(--warm); padding: 4px 0 4px 14px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<body>
+<main class="wrap">
+  <header>
+    <div class="eyebrow">NRS³ · Landauer · la entropía de la entropía</div>
+    <h1>La entropía de los caminos a la velocidad límite</h1>
+    <p class="formula">W = C(k, a) · C(b + c, b) &nbsp;·&nbsp; S<sub>camino</sub> = log W &nbsp;·&nbsp; Q ≥ k<sub>B</sub> T · S<sub>camino</sub></p>
+    <p>A la velocidad límite cada paso avanza una posición por un eje, siempre hacia adelante: en k = a + b + c pasos se
+      llega al borde del cono de luz, el octaedro |Δx| + |Δy| + |Δz| = k. Sobre un solo eje hay un único camino y su
+      entropía es cero. En cuanto se mueven dos ejes hay muchos: la entropía regresa por cualquier camino válido, y aun
+      en la saturación exacta, en c, borrar el registro de cuál camino tomó cuesta calor (Landauer).</p>
+    <div class="meta"><a href="https://github.com/naype888-cloud/nrs3-landauer-carnot">código Lean</a>
+      <a href="./">Landauer</a><a href="carnot.html">Carnot</a></div>
+  </header>
+
+  <section class="controls" aria-label="Controles">
+    <div class="ctl-row"><label for="a">pasos en x · a</label><input id="a" type="range" min="0" max="12" step="1" value="3"><span class="sval" id="av"></span></div>
+    <div class="ctl-row"><label for="b">pasos en y · b</label><input id="b" type="range" min="0" max="12" step="1" value="2"><span class="sval" id="bv"></span></div>
+    <div class="ctl-row"><label for="c">pasos en z · c</label><input id="c" type="range" min="0" max="12" step="1" value="1"><span class="sval" id="cv"></span></div>
+    <div class="ctl-row"><button id="redraw" type="button">otros caminos</button></div>
+  </section>
+
+  <section class="readouts" aria-live="polite">
+    <div class="ro"><span class="k">k = a + b + c</span><span class="v" id="ro-k"></span><span class="u">pasos hasta el borde del cono</span></div>
+    <div class="ro"><span class="k">W, caminos</span><span class="v" id="ro-w"></span><span class="u">C(k, a) · C(b + c, b)</span></div>
+    <div class="ro check"><span class="k">S_camino = log W</span><span class="v" id="ro-s"></span><span class="u" id="ro-su"></span></div>
+    <div class="ro"><span class="k">calor mínimo a 300 K</span><span class="v" id="ro-q"></span><span class="u">k_B · 300 K · S_camino</span></div>
+  </section>
+
+  <section class="plots">
+    <div class="plot"><div class="cap">Algunos caminos a la velocidad límite del origen al punto (a, b, c), todos en el borde del cono.</div><div class="chart" id="paths"></div></div>
+    <div class="plot"><div class="cap">S_camino según k: un eje (cero), dos ejes y tres ejes repartidos por igual.</div><div class="chart" id="growth"></div></div>
+  </section>
+
+  <p class="note">En una cadena el borde del cono tiene un solo camino: ahí la saturación es gratis. En el cubo no: llegar a
+    la velocidad límite se puede hacer en tantos órdenes como pasos se intercalan entre ejes, y ese conteo es entropía.
+    Es la entropía de cuál camino tomó la entropía; borrarla cuesta al menos k<sub>B</sub> T por nat.</p>
+
+  <section>
+    <h2>Cada valor y su teorema</h2>
+    <div class="ledger"><table>
+      <thead><tr><th>Enunciado</th><th>Lean</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>hay C(a + b + c, a) · C(b + c, b) caminos a la velocidad límite</td><td class="name">card_lightPath</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>sobre un eje, exactamente uno: S_camino = 0</td><td class="name">card_lightPath_axis, pathEntropy_axis</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>con dos ejes en movimiento, al menos dos</td><td class="name">one_lt_card_lightPath</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>entonces S_camino &gt; 0, aun en c</td><td class="name">pathEntropy_pos</td><td><span class="pill">probado</span></td></tr>
+        <tr><td>borrar cuál camino se tomó libera calor ≥ k_B T · S_camino</td><td class="name">landauer_pathEntropy</td><td><span class="pill">probado</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const kB = 1.380649e-23;
+  function lchoose(n, k) { let s = 0; for (let i = 1; i <= k; i++) s += Math.log(n - k + i) - Math.log(i); return s; }
+  const logW = (a, b, c) => lchoose(a + b + c, a) + lchoose(b + c, b);
+  const cfg = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+  function layout(xt, yt, extra) {
+    const fg = css("--fg"), mut = css("--mut"), line = css("--line");
+    const ax = t => ({ title: { text: t, font: { color: fg, size: 12 } }, gridcolor: line, zerolinecolor: line, linecolor: mut, tickfont: { color: mut, size: 11 } });
+    return Object.assign({ paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)", font: { family: "system-ui, sans-serif", color: fg },
+      margin: { l: 60, r: 20, t: 10, b: 50 }, xaxis: ax(xt), yaxis: ax(yt), showlegend: true,
+      legend: { orientation: "h", y: -0.25, font: { size: 11, color: fg } } }, extra || {});
+  }
+  function randomPath(a, b, c) {
+    const steps = []; for (let i = 0; i < a; i++) steps.push(0); for (let i = 0; i < b; i++) steps.push(1); for (let i = 0; i < c; i++) steps.push(2);
+    for (let i = steps.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [steps[i], steps[j]] = [steps[j], steps[i]]; }
+    const p = [[0, 0, 0]]; for (const s of steps) { const q = p[p.length - 1].slice(); q[s] += 1; p.push(q); } return p;
+  }
+  function draw() {
+    const a = +$("a").value, b = +$("b").value, c = +$("c").value, k = a + b + c;
+    $("av").textContent = a; $("bv").textContent = b; $("cv").textContent = c;
+    const lw = logW(a, b, c), W = Math.exp(lw);
+    $("ro-k").textContent = k;
+    $("ro-w").textContent = W < 1e15 ? Math.round(W).toLocaleString("es-MX") : W.toExponential(4);
+    $("ro-s").textContent = lw.toFixed(6) + " nat";
+    const axes = (a > 0) + (b > 0) + (c > 0);
+    $("ro-su").textContent = axes <= 1 ? "un eje: un solo camino, entropía cero" : "positiva aun en c";
+    $("ro-q").textContent = (kB * 300 * lw).toExponential(4) + " J";
+    const cols = [css("--accent"), css("--warm"), css("--ok"), css("--mut"), css("--fg")];
+    const n = Math.min(5, Math.max(1, Math.round(W)));
+    const tr = [];
+    for (let i = 0; i < n; i++) {
+      const p = randomPath(a, b, c);
+      tr.push({ type: "scatter3d", mode: "lines+markers", name: "camino " + (i + 1), x: p.map(v => v[0] + i * 0.04), y: p.map(v => v[1] + i * 0.04), z: p.map(v => v[2] + i * 0.04),
+        line: { color: cols[i % cols.length], width: 5 }, marker: { size: 2.5, color: cols[i % cols.length] } });
+    }
+    const fg = css("--fg"), mut = css("--mut");
+    const sc = t => ({ title: { text: t, font: { color: fg } }, tickfont: { color: mut }, gridcolor: css("--line"), backgroundcolor: "rgba(0,0,0,0)" });
+    Plotly.react("paths", tr, { paper_bgcolor: "rgba(0,0,0,0)", font: { color: fg }, margin: { l: 0, r: 0, t: 0, b: 0 },
+      showlegend: false, scene: { xaxis: sc("x"), yaxis: sc("y"), zaxis: sc("z"), aspectmode: "cube" } }, cfg);
+    const ks = []; for (let K = 0; K <= 36; K++) ks.push(K);
+    Plotly.react("growth", [
+      { type: "scatter", mode: "lines", name: "un eje", x: ks, y: ks.map(() => 0), line: { color: mut, width: 2 } },
+      { type: "scatter", mode: "lines", name: "dos ejes", x: ks, y: ks.map(K => logW(Math.ceil(K / 2), Math.floor(K / 2), 0)), line: { color: css("--warm"), width: 2 } },
+      { type: "scatter", mode: "lines", name: "tres ejes", x: ks, y: ks.map(K => { const q = Math.floor(K / 3), r = K % 3; return logW(q + (r > 0), q + (r > 1), q); }), line: { color: css("--accent"), width: 2 } },
+      { type: "scatter", mode: "markers", name: "elegido", x: [k], y: [lw], marker: { color: fg, size: 10 } }
+    ], layout("k", "S_camino (nat)"), cfg);
+  }
+  ["a", "b", "c"].forEach(id => $(id).addEventListener("input", draw));
+  $("redraw").addEventListener("click", draw);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  draw();
+})();
+</script>
+</body>
+</html>

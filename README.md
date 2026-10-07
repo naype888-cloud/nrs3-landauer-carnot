@@ -26,6 +26,26 @@ its mean energy.
 Finite-dimensional system and reservoir, any Hamiltonian `H`, any unitary `U` on the pair.
 Temperature and `k_B` are Physlib's (`Temperature`, `Constants.kB`).
 
+## The entropy of the paths at the speed limit
+
+On the cube a path at the speed limit takes one step per unit of time, each along one axis,
+always forward: in `k = a + b + c` steps it reaches the edge of the light cone, the octahedron
+`|Δx| + |Δy| + |Δz| = k`. Along one axis there is a single such path; as soon as two axes move
+there are `C(k, a) C(b + c, b)` of them, the multinomial. That count is entropy even at the speed
+limit, and by Landauer erasing which path was taken costs heat — the entropy of the path the
+entropy took (Szilard 1929, Landauer 1961).
+
+| Statement | Lean |
+|---|---|
+| `C(a + b + c, a) C(b + c, b)` paths at the speed limit | `PathEntropy.card_lightPath` |
+| along one axis exactly one, path entropy `0` | `card_lightPath_axis`, `pathEntropy_axis` |
+| with two axes moving, at least two; path entropy `> 0` | `one_lt_card_lightPath`, `pathEntropy_pos` |
+| erasing which path was taken releases heat `≥ k_B T · S_path` | `landauer_pathEntropy` |
+
+**[▶ Pruébalo (español): la entropía de los caminos a la velocidad límite](https://naype888-cloud.github.io/nrs3-landauer-carnot/caminos.html)**
+
+The same file is in Physlib as `PhyslibAlpha/CondensedMatter/TightBindingChain/PathEntropy.lean`.
+
 ## Kelvin–Planck and Carnot
 
 ![NRS³ · Carnot](docs/figures/carnot_efficiency.png)

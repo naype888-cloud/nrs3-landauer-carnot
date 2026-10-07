@@ -12,3 +12,7 @@ import NRS3LandauerCarnot
 #print axioms MState.carnot_entropy
 #print axioms MState.carnot
 #print axioms MState.carnot_temperature
+#print axioms PathEntropy.card_lightPath
+#print axioms PathEntropy.one_lt_card_lightPath
+#print axioms PathEntropy.pathEntropy_pos
+#print axioms PathEntropy.landauer_pathEntropy
