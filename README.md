@@ -58,6 +58,8 @@
 
 > **Proposition 1.1 (Sous-additivité et maximalité de Gibbs).** L'entropie de von Neumann est invariante par conjugaison unitaire `S(U ρ U†) = S(ρ)` et additive sur les produits tensoriels `S(ρ ⊗ σ) = S(ρ) + S(σ)`. L'état thermique de Gibbs maximise l'entropie à énergie fixée.
 
+<div align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_etape1.png"><img src="assets/claro/plaque_landauer_carnot_etape1.png" alt="Étape 1 : L'inégalité de Klein et la passivité de Gibbs" width="860"></picture></div>
+
 *Module formel :* [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`Sᵥₙ_prod`, `Sᵥₙ_uConj`, `Sᵥₙ_le_gibbs`).
 
 ---
@@ -65,6 +67,8 @@
 ### Étape 2 : Le principe de Landauer et le coût de l'information
 
 > **Proposition 2.1 (Borne thermique de Landauer).** L'effacement d'une quantité d'information `ΔS` dans un réservoir thermique à température `T` impose un transfert de chaleur `Q ≥ k_B T ΔS`.
+
+<div align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_etape2.png"><img src="assets/claro/plaque_landauer_carnot_etape2.png" alt="Étape 2 : Le principe de Landauer et le coût de l'information" width="860"></picture></div>
 
 *Module formel :* [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer`, `landauer_temperature`, `landauer_bit`).
 
@@ -74,6 +78,8 @@
 
 > **Proposition 3.1 (Rendement universel de Carnot).** Aucun cycle thermique couplé à deux thermostats ne peut dépasser l'efficacité réversible de Carnot 1 − T_c / T_h.
 
+<div align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_etape3.png"><img src="assets/claro/plaque_landauer_carnot_etape3.png" alt="Étape 3 : Théorème de Carnot et principe de Kelvin–Planck" width="860"></picture></div>
+
 *Module formel :* [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`inner_gibbsState_le_uConj`, `carnot_entropy`, `carnot`, `carnot_temperature`).
 
 ---
@@ -81,6 +87,8 @@
 ### Étape 4 : Cône causal et entropie géométrique des chemins
 
 > **Proposition 4.1 (Confinement du cône de lumière).** Le transport discret sur le graphe chemin interdit toute propagation plus rapide qu'un saut par unité de temps : `⟨m| H^k |n⟩ = 0` si `|m − n| > k`.
+
+<div align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_etape4.png"><img src="assets/claro/plaque_landauer_carnot_etape4.png" alt="Étape 4 : Cône causal et entropie géométrique des chemins" width="860"></picture></div>
 
 *Module formel :* [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) (`inner_pow_openHamiltonian_eq_zero`, `inner_pow_openHamiltonian_front`, `event_window`).  
 *Module formel (chemins) :* [`NRS3LandauerCarnot/PathEntropy.lean`](NRS3LandauerCarnot/PathEntropy.lean) (`card_lightPath`, `pathEntropy_pos`, `landauer_pathEntropy`).
