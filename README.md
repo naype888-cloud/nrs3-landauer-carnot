@@ -95,6 +95,61 @@
 
 ---
 
+## 🔬 Contributions Physlib fusionnées liées
+
+| PR Physlib | Titre | Lien avec ce dépôt | Statut |
+|:---:|:---|:---|:---:|
+| [**#1689**](https://github.com/leanprover-community/physlib/pull/1689) | tight binding chain with open boundary conditions | `LightCone.lean` importe la chaîne ouverte et son hamiltonien, étape 4 | **MERGED** |
+| [**#2096**](https://github.com/leanprover-community/physlib/pull/2096) | the open tight binding chain is the hopping of the path graph | Le saut de la chaîne ouverte est l'adjacence du graphe chemin : `⟨m|H^k|n⟩` ne voit que les chemins de longueur `k`, étape 4 | **MERGED** |
+
+---
+
+## 📚 Catalogue des modules Lean
+
+| Module | Théorème principal | Signification | `sorry` |
+|:---|:---|:---|:---:|
+| [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) | `landauer_bit` | Effacer un bit coûte au moins `k_B T log 2` | 0 |
+| [`NRS3LandauerCarnot/Equilibrium.lean`](NRS3LandauerCarnot/Equilibrium.lean) | `gibbsState_end_of_count` | L'état de Gibbs maximise l'entropie à énergie moyenne fixée | 0 |
+| [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) | `carnot_temperature` | `W ≤ (1 − T_c / T_h) Q_h` | 0 |
+| [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) | `inner_pow_openHamiltonian_eq_zero` | Cône de lumière : `⟨m|H^k|n⟩ = 0` pour `|m − n| > k` | 0 |
+| [`NRS3LandauerCarnot/PathEntropy.lean`](NRS3LandauerCarnot/PathEntropy.lean) | `landauer_pathEntropy` | Effacer le chemin suivi coûte au moins `k_B T` fois son entropie | 0 |
+
+### Portée
+
+* Le système et le réservoir sont de dimension finie ; l'interaction est un unitaire sur `ρ ⊗ γ`. La limite thermodynamique n'est pas traitée.
+* Le moteur de Carnot est un cycle à deux réservoirs de Gibbs ; aucune dynamique en temps continu n'est formalisée.
+
+---
+
+## 🏛️ La mosaïque
+
+| Dépôt | Objet |
+|:---|:---|
+| [**nava-robertson-schrodinger**](https://github.com/naype888-cloud/nava-robertson-schrodinger) | Le canon : l'incertitude élémentaire dimensionnelle sur le cube ouvert |
+| [`lean4-commits`](https://github.com/naype888-cloud/lean4-commits) | Les PRs Lean 4 fusionnées et ouvertes dans Physlib |
+| [`Proper-Time-General-Relativity`](https://github.com/naype888-cloud/Proper-Time-General-Relativity) | Le temps compte les pas à quatre sites |
+| [`nrs3-golab`](https://github.com/naype888-cloud/nrs3-golab) | Le π d'un plan normé et la stabilité des orbites |
+| [`nrs3-mandelstam-tamm-cramer-rao`](https://github.com/naype888-cloud/nrs3-mandelstam-tamm-cramer-rao) | Vitesse d'évolution et borne d'estimation de phase |
+| [`nrs3-de-sitter`](https://github.com/naype888-cloud/nrs3-de-sitter) | L'entropie d'horizon fixe la constante cosmologique ; les deux équations de Friedmann |
+| [`nrs3-penrose`](https://github.com/naype888-cloud/nrs3-penrose) | Le temps d'effondrement ħ/ΔE est une borne, non une durée de vie |
+| [`nrs3-bekenstein`](https://github.com/naype888-cloud/nrs3-bekenstein) | Bits sur la frontière, fibre de Minkowski et borne universelle |
+| [`nrs3-rovelli-lqg`](https://github.com/naype888-cloud/nrs3-rovelli-lqg) | Le spectre d'aire LQG, les piqûres d'horizon et le paramètre d'Immirzi |
+| [`nrs3-uncertainty-cone`](https://github.com/naype888-cloud/nrs3-uncertainty-cone) | La matrice de Gram d'une paire conjuguée est un quadrivecteur de Minkowski |
+
+---
+
+## ⏱️ Chronologie
+
+| Année | Résultat | Étape |
+|:---:|:---|:---:|
+| **1824** | Carnot : le rendement maximal entre deux sources | 3 |
+| **1851** | Kelvin : la chaleur d'une seule source ne donne pas de travail | 3 |
+| **1902** | Gibbs : l'ensemble canonique e^(−βH) / Z | 1 |
+| **1931** | Klein : l'inégalité de Klein | 1 |
+| **1961** | Landauer : effacer un bit coûte k_B T ln 2 | 2 |
+
+---
+
 ## 🛠️ Compilation et vérification
 
 ```bash
@@ -110,6 +165,12 @@ Le module compile sous la base axiomatique standard de Lean 4 et Mathlib :
 ```
 
 **0 `sorry`**, aucun axiome ad hoc.
+
+---
+
+## 📜 Licence
+
+[NRS Noncommercial License 1.0.0](LICENSE).
 
 ---
 
