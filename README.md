@@ -50,6 +50,10 @@
 
 ## 📐 Démonstration constructive en quatre étapes
 
+<div align="center">
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_etapes.png"><img src="assets/claro/plaque_landauer_carnot_etapes.png" alt="L'échelle déductive en quatre étapes : de Klein à Carnot et Landauer" width="860"></picture>
+</div>
+
 ### Étape 1 : L'inégalité de Klein et la passivité de Gibbs
 
 > **Proposition 1.1 (Sous-additivité et maximalité de Gibbs).** L'entropie de von Neumann est invariante par conjugaison unitaire `S(U ρ U†) = S(ρ)` et additive sur les produits tensoriels `S(ρ ⊗ σ) = S(ρ) + S(σ)`. L'état thermique de Gibbs maximise l'entropie à énergie fixée.
