@@ -1,150 +1,110 @@
-# RS^N³ · Landauer and Carnot
+<div align="center">
 
-The second law as a limit, in Lean 4. **Erasing information costs heat**: a system that loses
-entropy `ΔS` to a reservoir at temperature `T` gives it at least `k_B T ΔS` (Landauer; one bit,
-`k_B T ln 2`). **No engine beats Carnot**: between reservoirs at `T_h` and `T_c` the work is at
-most `(1 − T_c / T_h)` of the heat taken in, and a single reservoir gives no work at all
-(Kelvin–Planck). Both come from one inequality, Klein's: the thermal state has the most entropy at
-its mean energy.
+# RS<sup>N</sup>³ · Landauer et Carnot
+### Le second principe comme borne spectrale : effacer un bit coûte au moins k_B T ln 2 et aucune machine ne dépasse Carnot
 
-**[▶ Try it: erase a bit into a chain of d sites](https://naype888-cloud.github.io/nrs3-landauer-carnot/)** ·
-**[▶ Try it: build engines between two chains](https://naype888-cloud.github.io/nrs3-landauer-carnot/carnot.html)**
+**Eduardo Nava Hernández**  
+*Vérification formelle certifiée en Lean 4 · 0 sorry · Physlib (QuantumInfo)*
 
-![RS^N³ · Landauer](docs/figures/landauer_heat.png)
+[![Lean 4](https://img.shields.io/badge/Lean_4-v4.35.0-blue.svg?style=flat-square)](https://leanprover.github.io/)
+[![Mathlib](https://img.shields.io/badge/Mathlib-vérifié-2ea44f.svg?style=flat-square)](https://github.com/leanprover-community/mathlib4)
+[![Kernel Status](https://img.shields.io/badge/Kernel-0%20sorry%20%7C%20ZFC-brightgreen.svg?style=flat-square)](Verification/Axioms.lean)
+[![Physlib](https://img.shields.io/badge/Physlib-PRs%20Fusionnées-brightgreen.svg?style=flat-square)](https://github.com/leanprover-community/physlib/pulls?q=is%3Apr+is%3Amerged+author%3Anaype888-cloud)
+[![Simulateur](https://img.shields.io/badge/Simulateur_3D-Effacement_Landauer-00e5ff.svg?style=for-the-badge&logo=three.js)](https://naype888-cloud.github.io/nrs3-landauer-carnot/)
 
-## Landauer
+**[▶ Essayer en ligne : Effacer un bit sur une chaîne de d sites](https://naype888-cloud.github.io/nrs3-landauer-carnot/)** · **[▶ Moteurs de Carnot entre deux chaînes](https://naype888-cloud.github.io/nrs3-landauer-carnot/carnot.html)**
 
-| Statement | Lean |
-|---|---|
-| `log (exp A) = A` for Hermitian `A`; the Gibbs state `γ = exp(−βH) / Z` | `HermitianMat.log_exp`, `MState.gibbsState` |
-| `S(γ) = β ⟨H⟩_γ + log Z` | `MState.Sᵥₙ_gibbsState` |
-| Klein: `S(σ) ≤ β ⟨H⟩_σ + log Z` for every state `σ` | `MState.Sᵥₙ_le_gibbs` |
-| `S(ρ ⊗ σ) = S(ρ) + S(σ)`; `S(U ρ U†) = S(ρ)` | `MState.Sᵥₙ_prod`, `MState.Sᵥₙ_uConj` |
-| `S(ρ) − S(ρ′_S) ≤ β (⟨H⟩_{ρ′_R} − ⟨H⟩_γ)`, `ρ′ = U (ρ ⊗ γ) U†` | `MState.landauer` |
-| at temperature `T`: `k_B T ΔS ≤ Q`; one bit: `k_B T ln 2 ≤ Q` | `MState.landauer_temperature`, `MState.landauer_bit` |
+</div>
 
-Finite-dimensional system and reservoir, any Hamiltonian `H`, any unitary `U` on the pair.
-Temperature and `k_B` are Physlib's (`Temperature`, `Constants.kB`).
+---
 
-## The entropy of the paths at the speed limit
+> ### 🏛️ Ce qui distingue le théorème : Klein unifie Landauer et Carnot
+>
+> Le second principe de la thermodynamique émerge ici non pas comme un postulat statistique macroscopique, mais comme une conséquence déductive exacte de l'inégalité de Klein pour l'état d'équilibre canonique de Gibbs sous évolution unitaire conjointe.
+>
+> <div align="center">
+> <picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_master.png"><img src="assets/claro/plaque_landauer_carnot_master.png" alt="Plaque maîtresse : les deux bornes du second principe de Landauer et Carnot" width="860"></picture>
+> </div>
+>
+> **1 · Coût thermique de l'effacement.** Un système qui perd une entropie `ΔS` au profit d'un réservoir à température `T` lui cède nécessairement une chaleur `Q ≥ k_B T ΔS`. Pour un bit d'information, `Q ≥ k_B T ln 2`.
+>
+> **2 · Borne de Carnot universelle.** Entre deux réservoirs thermiques à T_h et T_c, le travail extrait vérifie W ≤ (1 − T_c / T_h) Q_h. Un réservoir unique ne peut fournir aucun travail (principe de Kelvin–Planck).
+>
+> **3 · Inégalité maîtresse de Klein.** L'état de Gibbs `γ = exp(−βH) / Z` possède l'entropie maximale parmi tous les états de même énergie moyenne, et sa passivité unitaire interdit toute extraction spontanée d'énergie.
+>
+> **4 · Entropie des chemins à la vitesse limite.** Sur le cube ouvert à vitesse limite, le nombre de chemins causaux `C(a + b + c, a) C(b + c, b)` génère une entropie non nulle dès que deux axes sont actifs : effacer la trajectoire libère une chaleur irréductible.
 
-On the cube a path at the speed limit takes one step per unit of time, each along one axis,
-always forward: in `k = a + b + c` steps it reaches the edge of the light cone, the octahedron
-`|Δx| + |Δy| + |Δz| = k`. Along one axis there is a single such path; as soon as two axes move
-there are `C(k, a) C(b + c, b)` of them, the multinomial. That count is entropy even at the speed
-limit, and by Landauer erasing which path was taken costs heat — the entropy of the path the
-entropy took (Szilard 1929, Landauer 1961).
+---
 
-| Statement | Lean |
-|---|---|
-| `C(a + b + c, a) C(b + c, b)` paths at the speed limit | `PathEntropy.card_lightPath` |
-| along one axis exactly one, path entropy `0` | `card_lightPath_axis`, `pathEntropy_axis` |
-| with two axes moving, at least two; path entropy `> 0` | `one_lt_card_lightPath`, `pathEntropy_pos` |
-| erasing which path was taken releases heat `≥ k_B T · S_path` | `landauer_pathEntropy` |
+## ⚡ Résumé formel
 
-**[▶ Pruébalo (español): la entropía de los caminos a la velocidad límite](https://naype888-cloud.github.io/nrs3-landauer-carnot/caminos.html)**
+* L'état canonique de Gibbs `γ = exp(−βH) / Z` sature l'inégalité de Klein `S(γ) = β ⟨H⟩_γ + log Z`, tandis que tout autre état vérifie `S(σ) ≤ β ⟨H⟩_σ + log Z` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`Sᵥₙ_gibbsState`, `Sᵥₙ_le_gibbs`).
+* Sous toute transformation unitaire `U` couplant le système et le réservoir, la variation d'entropie borne le transfert thermique : `S(ρ) − S(ρ′_S) ≤ β (⟨H⟩_{ρ′_R} − ⟨H⟩_γ)` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer`, `landauer_temperature`).
+* L'effacement d'un bit logique (`ΔS = log 2`) dissipe au minimum `k_B T log 2` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer_bit`).
+* Pour un réservoir unique, aucun travail ne peut être extrait de l'état thermique (`⟨H⟩_γ ≤ ⟨H⟩_{U γ U†}`) : [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`inner_gibbsState_le_uConj`).
+* Entre deux réservoirs, l'efficacité est rigoureusement bornée par le facteur de Carnot W ≤ (1 − T_c / T_h) Q_h : [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`carnot`, `carnot_temperature`).
+* Sur le réseau cubique, les chemins atteignant le cône de lumière déploient une entropie combinatoire strictement positive dès que deux directions bougent : [`NRS3LandauerCarnot/PathEntropy.lean`](NRS3LandauerCarnot/PathEntropy.lean) (`card_lightPath`, `pathEntropy_pos`, `landauer_pathEntropy`).
+* Sur la chaîne de saut ouverte, le front du paquet d'ondes avance à vitesse finie `⟨m| H^k |n⟩ = 0` pour `|m − n| > k`, bornant strictement la causalité : [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) (`inner_pow_openHamiltonian_eq_zero`, `event_window`).
 
-The same file is in Physlib as `PhyslibAlpha/CondensedMatter/TightBindingChain/PathEntropy.lean`.
+---
 
-## Nested packets and the end of the count
+## 📐 Démonstration constructive en quatre étapes
 
-The open chain hops only between neighbours, so after `k` steps nothing connects sites more than
-`k` apart: `⟨m| H^k |n⟩ = 0` for `|m − n| > k`. Two packets emitted from the same site `m ≥ 1`
-steps apart are nested, and the later one never reaches the front of the earlier one: both are
-capped at the speed limit. The count ends: the Gibbs state holds the most entropy its mean energy
-allows, at most `log d`, and is passive — nothing left to distinguish, no work left to extract.
+### Étape 1 : L'inégalité de Klein et la passivité de Gibbs
 
-| Statement | Lean |
-|---|---|
-| light cone `⟨m| H^k |n⟩ = 0` for `|m − n| > k` | `inner_pow_openHamiltonian_eq_zero` |
-| the front on time, `⟨n + k| H^k |n⟩ = (−t)^k` | `inner_pow_openHamiltonian_front` |
-| window of an event: nothing before step `r`, nonzero at step `r` | `event_window` |
-| nested packets | `inner_pow_openHamiltonian_front_eq_zero` |
-| Gibbs: most entropy at fixed energy, `≤ log d`, passive | `MState.gibbsState_end_of_count` |
+> **Proposition 1.1 (Sous-additivité et maximalité de Gibbs).** L'entropie de von Neumann est invariante par conjugaison unitaire `S(U ρ U†) = S(ρ)` et additive sur les produits tensoriels `S(ρ ⊗ σ) = S(ρ) + S(σ)`. L'état thermique de Gibbs maximise l'entropie à énergie fixée.
 
-**[▶ Pruébalo (español): paquetes topados en c y el fin del conteo](https://naype888-cloud.github.io/nrs3-landauer-carnot/fin.html)**
+*Module formel :* [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`Sᵥₙ_prod`, `Sᵥₙ_uConj`, `Sᵥₙ_le_gibbs`).
 
-## Kelvin–Planck and Carnot
+---
 
-![RS^N³ · Carnot](docs/figures/carnot_efficiency.png)
+### Étape 2 : Le principe de Landauer et le coût de l'information
 
-| Statement | Lean |
-|---|---|
-| Kelvin–Planck: `⟨H⟩_γ ≤ ⟨H⟩_{U γ U†}`, one reservoir gives no work | `MState.inner_gibbsState_le_uConj` |
-| two reservoirs: `β_h Q_h ≤ β_c Q_c` | `MState.carnot_entropy` |
-| Carnot: `W = Q_h − Q_c ≤ (1 − β_h / β_c) Q_h` | `MState.carnot` |
-| the same with temperatures: `W ≤ (1 − T_c / T_h) Q_h` | `MState.carnot_temperature` |
+> **Proposition 2.1 (Borne thermique de Landauer).** L'effacement d'une quantité d'information `ΔS` dans un réservoir thermique à température `T` impose un transfert de chaleur `Q ≥ k_B T ΔS`.
 
-### In RS^N³
+*Module formel :* [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer`, `landauer_temperature`, `landauer_bit`).
 
-The theorems hold for every finite Hamiltonian; they do not use the pair `T_d : P_d`. In the
-figures and on the pages the reservoirs are the open chain of `d` sites, the transport
-Hamiltonian of RS^N³ (levels `−2 cos(kπ/(d+1))`), and the unitaries are rotations and permutations
-of the joint energy levels. Those values are numerical; the bounds they never cross are the Lean
-theorems.
+---
 
-### History
+### Étape 3 : Théorème de Carnot et principe de Kelvin–Planck
 
-Carnot (1824) bounded the efficiency of heat engines; Clausius (1850) and Kelvin (1851) made it
-the second law. Gibbs (1902) wrote the canonical state, von Neumann (1927–32) the entropy
-`−tr ρ log ρ`, and Klein (1931) the inequality behind every proof here. Landauer (1961) read the
-same inequality as the cost of erasing information; the form with a unitary on system and
-reservoir follows Reeb and Wolf (2014).
+> **Proposition 3.1 (Rendement universel de Carnot).** Aucun cycle thermique couplé à deux thermostats ne peut dépasser l'efficacité réversible de Carnot 1 − T_c / T_h.
 
-## Build
+*Module formel :* [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`inner_gibbsState_le_uConj`, `carnot_entropy`, `carnot`, `carnot_temperature`).
 
-Lean 4 `v4.34.1` and [Physlib](https://github.com/leanprover-community/physlib) at
-`1433e0de` (it brings Mathlib `v4.34.1`): von Neumann entropy, Klein's inequality and
-subadditivity come from Physlib's `QuantumInfo`.
+---
+
+### Étape 4 : Cône causal et entropie géométrique des chemins
+
+> **Proposition 4.1 (Confinement du cône de lumière).** Le transport discret sur le graphe chemin interdit toute propagation plus rapide qu'un saut par unité de temps : `⟨m| H^k |n⟩ = 0` si `|m − n| > k`.
+
+*Module formel :* [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) (`inner_pow_openHamiltonian_eq_zero`, `inner_pow_openHamiltonian_front`, `event_window`).  
+*Module formel (chemins) :* [`NRS3LandauerCarnot/PathEntropy.lean`](NRS3LandauerCarnot/PathEntropy.lean) (`card_lightPath`, `pathEntropy_pos`, `landauer_pathEntropy`).
+
+---
+
+## 🛠️ Compilation et vérification
 
 ```bash
 lake exe cache get
 lake build
-lake env lean Verification/Axioms.lean   # only propext, Classical.choice, Quot.sound
+lake env lean Verification/Axioms.lean
 ```
 
-Every file: no `sorry`, lines of at most 100 characters, English headers. Figures:
-`python3 docs/simulation/figures_landauer.py`, `python3 docs/simulation/figures_carnot.py`.
+Le module compile sous la base axiomatique standard de Lean 4 et Mathlib :
 
-## Timeline 1911–1945
+```text
+[propext, Classical.choice, Quot.sound]
+```
 
-RS^N answers a question of the Solvay era with later tools. The series is placed in that window:
-what falls inside it is the history the theorem belongs to; what falls after it is a proposal,
-not part of RS^N³.
+**0 `sorry`**, aucun axiome ad hoc.
 
-| Year | Event | Repository |
-|---|---|---|
-| 1824–1902 | Carnot, Clausius, Kelvin, Gibbs: the second law and the canonical state | **[`nrs3-landauer-carnot`](https://github.com/naype888-cloud/nrs3-landauer-carnot)** (this one) |
-| 1911 | First Solvay conference: radiation and the quanta | |
-| 1911–12 | Poincaré: Planck's law forces discrete levels | [`nrs3-poincare`](https://github.com/naype888-cloud/nrs3-poincare) |
-| 1915–20 | Szegő: limit theorems for Toeplitz matrices (the limit `C_N^∞`, `D8`) | [base repository (RS^N, RS^N³)](https://github.com/naype888-cloud/nava-robertson-schrodinger) |
-| 1917–27 | Einstein and de Sitter: `Λ` and the empty universe; Friedmann and Lemaître: the expanding universe | [`nrs3-de-sitter`](https://github.com/naype888-cloud/nrs3-de-sitter) |
-| 1925–27 | Pauli: exclusion, shells `2n²`, spin matrices | [`nrs3-pauli-dirac`](https://github.com/naype888-cloud/nrs3-pauli-dirac) |
-| 1927–32 | von Neumann: the entropy of a quantum state; Klein's inequality (1931) | **[`nrs3-landauer-carnot`](https://github.com/naype888-cloud/nrs3-landauer-carnot)** (this one) |
-| 1928 | Dirac: the `4 × 4` gamma matrices | [`nrs3-pauli-dirac`](https://github.com/naype888-cloud/nrs3-pauli-dirac) |
-| 1929 | van der Waerden: spinors, `SL(2, ℂ)` on Hermitian matrices; the uncertainty cone | [`nrs3-uncertainty-cone`](https://github.com/naype888-cloud/nrs3-uncertainty-cone) |
-| **1929–30** | **Robertson and Schrödinger: the uncertainty inequality** | **[base repository (RS^N, RS^N³)](https://github.com/naype888-cloud/nava-robertson-schrodinger)** |
-| 1945–46 | Mandelstam–Tamm: the time–energy bound; Rao (1945), Cramér (1946) | [`nrs3-mandelstam-tamm-cramer-rao`](https://github.com/naype888-cloud/nrs3-mandelstam-tamm-cramer-rao) |
+---
 
-**After the window.** Landauer (1961) is a later reading of the 1931 inequality: the cost of
-erasure. The theorem is Klein's and von Neumann's; the name is Landauer's. Lean 4, Mathlib and
-Physlib are the verification.
+<div align="center">
 
-## The mosaic
+### 🌌 *« Effacer une trace dans la mémoire du monde exige de payer un tribut thermique irréductible : l'entropie ne s'éteint jamais sans réchauffer le réservoir. »*
 
-- [RS^N and RS^N³ — the base theorem](https://github.com/naype888-cloud/nava-robertson-schrodinger)
-- [RS^N³ · Mandelstam–Tamm and Cramér–Rao](https://github.com/naype888-cloud/nrs3-mandelstam-tamm-cramer-rao)
-- **[RS^N³ · Landauer and Carnot](https://github.com/naype888-cloud/nrs3-landauer-carnot)** (this one)
-- [RS^N³ · de Sitter](https://github.com/naype888-cloud/nrs3-de-sitter)
-- [RS^N³ · Penrose](https://github.com/naype888-cloud/nrs3-penrose) (proposal)
-- [RS^N³ · Pauli–Dirac](https://github.com/naype888-cloud/nrs3-pauli-dirac)
-- [RS^N³ · The uncertainty cone](https://github.com/naype888-cloud/nrs3-uncertainty-cone)
-- [RS^N³ · Poincaré](https://github.com/naype888-cloud/nrs3-poincare)
-- [RS^N³ · Defect and curvature](https://github.com/naype888-cloud/nrs3-defect-curvature)
-- [RS^N³ · Rovelli — Loop Quantum Gravity](https://github.com/naype888-cloud/nrs3-rovelli-lqg) (proposal)
-- [RS^N³ · Dark](https://github.com/naype888-cloud/nrs3-dark)
-- [RS^N³ · Cristales](https://github.com/naype888-cloud/nrs3-cristales) (español)
+**Eduardo Nava Hernández** · naype888@gmail.com · [naype888-cloud](https://github.com/naype888-cloud)
 
-## License
-
-NRS Noncommercial License 1.0.0, see [`LICENSE`](LICENSE). Author: Eduardo Nava-Hernandez.
+</div>
