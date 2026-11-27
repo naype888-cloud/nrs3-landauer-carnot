@@ -102,7 +102,7 @@
 | PR Physlib | Titre | Lien avec ce dépôt | Statut |
 |:---:|:---|:---|:---:|
 | [**#1689**](https://github.com/leanprover-community/physlib/pull/1689) | tight binding chain with open boundary conditions | `LightCone.lean` importe la chaîne ouverte et son hamiltonien, étape 4 | **MERGED** |
-| [**#2096**](https://github.com/leanprover-community/physlib/pull/2096) | the open tight binding chain is the hopping of the path graph | Le saut de la chaîne ouverte est l'adjacence du graphe chemin : `⟨m|H^k|n⟩` ne voit que les chemins de longueur `k`, étape 4 | **MERGED** |
+| [**#2096**](https://github.com/leanprover-community/physlib/pull/2096) | the open tight binding chain is the hopping of the path graph | Le saut de la chaîne ouverte est l'adjacence du graphe chemin : `⟨m\|H^k\|n⟩` ne voit que les chemins de longueur `k`, étape 4 | **MERGED** |
 
 ---
 
@@ -113,7 +113,7 @@
 | [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) | `landauer_bit` | Effacer un bit coûte au moins `k_B T log 2` | 0 |
 | [`NRS3LandauerCarnot/Equilibrium.lean`](NRS3LandauerCarnot/Equilibrium.lean) | `gibbsState_end_of_count` | L'état de Gibbs maximise l'entropie à énergie moyenne fixée | 0 |
 | [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) | `carnot_temperature` | `W ≤ (1 − T_c / T_h) Q_h` | 0 |
-| [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) | `inner_pow_openHamiltonian_eq_zero` | Cône de lumière : `⟨m|H^k|n⟩ = 0` pour `|m − n| > k` | 0 |
+| [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) | `inner_pow_openHamiltonian_eq_zero` | Cône de lumière : `⟨m\|H^k\|n⟩ = 0` pour `\|m − n\| > k` | 0 |
 | [`NRS3LandauerCarnot/PathEntropy.lean`](NRS3LandauerCarnot/PathEntropy.lean) | `landauer_pathEntropy` | Effacer le chemin suivi coûte au moins `k_B T` fois son entropie | 0 |
 
 ### Portée
@@ -129,7 +129,7 @@
 |:---|:---|
 | [`00 · bacqm-substrate`](https://github.com/naype888-cloud/bacqm-systems) | Substrat matériel & moteur du noyau Linux : modules de mémoire dynamiques en temps réel |
 | [`01 · nava-robertson-schrodinger`](https://github.com/naype888-cloud/nava-robertson-schrodinger) | Le canon : l'incertitude élémentaire dimensionnelle sur le cube ouvert, ℂᵈ ⊗ ℂᵈ ⊗ ℂᵈ |
-| [`02 · Proper-Time-General-Relativity`](https://github.com/naype888-cloud/Proper-Time-General-Relativity) | Le temps compte les pas : τ = 1/(φ|t|) à quatre sites ; masse effective, équivalence, gravitation |
+| [`02 · Proper-Time-General-Relativity`](https://github.com/naype888-cloud/Proper-Time-General-Relativity) | Le temps compte les pas : τ = 1/(φ\|t\|) à quatre sites ; masse effective, équivalence, gravitation |
 | [`03 · nrs3-mandelstam-tamm-cramer-rao`](https://github.com/naype888-cloud/nrs3-mandelstam-tamm-cramer-rao) | Mandelstam–Tamm et Cramér–Rao : aucun état n'est orthogonal à lui-même avant πħ/(2ΔE) |
 | [`04 · YM-By-Perelmans-surgery-method`](https://github.com/naype888-cloud/YM-By-Perelmans-surgery-method) | Yang–Mills sur réseau : loi d'aire uniforme, matrice de transfert, défaut de fibre (0 sorry) |
 | [`05 · nrs3-tightbinding`](https://github.com/naype888-cloud/nrs3-tightbinding) | La chaîne de Physlib, le cube ouvert et la table périodique (H–Og), un cube 3D par élément |
