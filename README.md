@@ -2,7 +2,8 @@
 
 <div align="center">
 
-# RS<sup>N</sup>³ · Landauer et Carnot
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/titre_landauer_carnot.png"><img src="assets/claro/titre_landauer_carnot.png" alt="RS^N³ · Landauer et Carnot" width="860"></picture>
+**"RS<sup>N</sup>³ · Landauer et Carnot"**
 ### Le second principe comme borne spectrale : effacer un bit coûte au moins k_B T ln 2 et aucune machine ne dépasse Carnot
 
 **Eduardo Nava Hernández**  
