@@ -7,7 +7,7 @@
 ### Le second principe comme borne spectrale : effacer un bit coûte au moins k_B T ln 2 et aucune machine ne dépasse Carnot
 
 **Eduardo Nava Hernández**  
-*Vérification formelle certifiée en Lean 4 · 0 sorry · Physlib (QuantumInfo)*
+*Vérification formelle certifiée en Lean 4 · `0 sorry` · Physlib (QuantumInfo)*
 
 [![Lean 4](https://img.shields.io/badge/Lean_4-v4.35.0-blue.svg?style=flat-square)](https://leanprover.github.io/)
 [![Mathlib](https://img.shields.io/badge/Mathlib-vérifié-2ea44f.svg?style=flat-square)](https://github.com/leanprover-community/mathlib4)
@@ -29,7 +29,7 @@
 > <picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_master.png"><img src="assets/claro/plaque_landauer_carnot_master.png" alt="Plaque maîtresse : les deux bornes du second principe de Landauer et Carnot" width="860"></picture>
 > </div>
 >
-> **1 · Coût thermique de l'effacement.** Un système qui perd une entropie `ΔS` au profit d'un réservoir à température `T` lui cède nécessairement une chaleur `Q ≥ k_B T ΔS`. Pour un bit d'information, `Q ≥ k_B T ln 2`.
+> **1 · Coût thermique de l'effacement.** Un système qui perd une entropie `ΔS` au profit d'un réservoir à température T lui cède nécessairement une chaleur Q ≥ k_B T ΔS. Pour un bit d'information, Q ≥ k_B T ln 2.
 >
 > **2 · Borne de Carnot universelle.** Entre deux réservoirs thermiques à T_h et T_c, le travail extrait vérifie W ≤ (1 − T_c / T_h) Q_h. Un réservoir unique ne peut fournir aucun travail (principe de Kelvin–Planck).
 >
@@ -41,10 +41,10 @@
 
 ## ⚡ Résumé formel
 
-* L'état canonique de Gibbs `γ = exp(−βH) / Z` sature l'inégalité de Klein `S(γ) = β ⟨H⟩_γ + log Z`, tandis que tout autre état vérifie `S(σ) ≤ β ⟨H⟩_σ + log Z` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`Sᵥₙ_gibbsState`, `Sᵥₙ_le_gibbs`).
-* Sous toute transformation unitaire `U` couplant le système et le réservoir, la variation d'entropie borne le transfert thermique : `S(ρ) − S(ρ′_S) ≤ β (⟨H⟩_{ρ′_R} − ⟨H⟩_γ)` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer`, `landauer_temperature`).
+* L'état canonique de Gibbs `γ = exp(−βH) / Z` sature l'inégalité de Klein `S(γ) = β ⟨H⟩_γ + log Z`, tandis que tout autre état vérifie S(σ) ≤ β ⟨H⟩_σ + log Z : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`Sᵥₙ_gibbsState`, `Sᵥₙ_le_gibbs`).
+* Sous toute transformation unitaire U couplant le système et le réservoir, la variation d'entropie borne le transfert thermique : `S(ρ) − S(ρ′_S) ≤ β (⟨H⟩_{ρ′_R} − ⟨H⟩_γ)` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer`, `landauer_temperature`).
 * L'effacement d'un bit logique (`ΔS = log 2`) dissipe au minimum `k_B T log 2` : [`NRS3LandauerCarnot/Landauer.lean`](NRS3LandauerCarnot/Landauer.lean) (`landauer_bit`).
-* Pour un réservoir unique, aucun travail ne peut être extrait de l'état thermique (`⟨H⟩_γ ≤ ⟨H⟩_{U γ U†}`) : [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`inner_gibbsState_le_uConj`).
+* Pour un réservoir unique, aucun travail ne peut être extrait de l'état thermique (⟨H⟩_γ ≤ ⟨H⟩_{U γ U†}) : [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`inner_gibbsState_le_uConj`).
 * Entre deux réservoirs, l'efficacité est rigoureusement bornée par le facteur de Carnot W ≤ (1 − T_c / T_h) Q_h : [`NRS3LandauerCarnot/Carnot.lean`](NRS3LandauerCarnot/Carnot.lean) (`carnot`, `carnot_temperature`).
 * Sur le réseau cubique, les chemins atteignant le cône de lumière déploient une entropie combinatoire strictement positive dès que deux directions bougent : [`NRS3LandauerCarnot/PathEntropy.lean`](NRS3LandauerCarnot/PathEntropy.lean) (`card_lightPath`, `pathEntropy_pos`, `landauer_pathEntropy`).
 * Sur la chaîne de saut ouverte, le front du paquet d'ondes avance à vitesse finie `⟨m| H^k |n⟩ = 0` pour `|m − n| > k`, bornant strictement la causalité : [`NRS3LandauerCarnot/LightCone.lean`](NRS3LandauerCarnot/LightCone.lean) (`inner_pow_openHamiltonian_eq_zero`, `event_window`).
@@ -69,7 +69,7 @@
 
 ### Étape 2 : Le principe de Landauer et le coût de l'information
 
-> **Proposition 2.1 (Borne thermique de Landauer).** L'effacement d'une quantité d'information `ΔS` dans un réservoir thermique à température `T` impose un transfert de chaleur `Q ≥ k_B T ΔS`.
+> **Proposition 2.1 (Borne thermique de Landauer).** L'effacement d'une quantité d'information `ΔS` dans un réservoir thermique à température T impose un transfert de chaleur Q ≥ k_B T ΔS.
 
 <div align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/oscuro/plaque_landauer_carnot_etape2.png"><img src="assets/claro/plaque_landauer_carnot_etape2.png" alt="Étape 2 : Le principe de Landauer et le coût de l'information" width="860"></picture></div>
 
@@ -132,7 +132,7 @@
 | [`01 · nava-robertson-schrodinger`](https://github.com/naype888-cloud/nava-robertson-schrodinger) | Le canon : l'incertitude élémentaire dimensionnelle sur le cube ouvert, ℂᵈ ⊗ ℂᵈ ⊗ ℂᵈ |
 | [`02 · Proper-Time-General-Relativity`](https://github.com/naype888-cloud/Proper-Time-General-Relativity) | Le temps compte les pas : τ = 1/(φ\|t\|) à quatre sites ; masse effective, équivalence, gravitation |
 | [`03 · nrs3-mandelstam-tamm-cramer-rao`](https://github.com/naype888-cloud/nrs3-mandelstam-tamm-cramer-rao) | Mandelstam–Tamm et Cramér–Rao : aucun état n'est orthogonal à lui-même avant πħ/(2ΔE) |
-| [`04 · YM-By-Perelmans-surgery-method`](https://github.com/naype888-cloud/YM-By-Perelmans-surgery-method) | Yang–Mills sur réseau : loi d'aire uniforme, matrice de transfert, défaut de fibre (0 sorry) |
+| [`04 · YM-By-Perelmans-surgery-method`](https://github.com/naype888-cloud/YM-By-Perelmans-surgery-method) | Yang–Mills sur réseau : loi d'aire uniforme, matrice de transfert, défaut de fibre (`0 sorry`) |
 | [`05 · nrs3-tightbinding`](https://github.com/naype888-cloud/nrs3-tightbinding) | La chaîne de Physlib, le cube ouvert et la table périodique (H–Og), un cube 3D par élément |
 | [`06 · nrs3-cristales`](https://github.com/naype888-cloud/nrs3-cristales) | Cristaux : la symétrie donne la forme de Σ et Ω, le spectre donne la taille |
 | [`07 · nrs3-completude`](https://github.com/naype888-cloud/nrs3-completude) | Complétude constructive et limites spectrales par Robertson–Fiedler–Niven–Szegő |
@@ -143,7 +143,7 @@
 | [`12 · nrs3-penrose`](https://github.com/naype888-cloud/nrs3-penrose) | Effondrement gravitationnel de Diósi–Penrose : temps de décohérence par auto-énergie |
 | [`13 · nrs3-rovelli-lqg`](https://github.com/naype888-cloud/nrs3-rovelli-lqg) | Gravité quantique à boucles : spectre d'aire discrète, opérateur de surface et saturation de spin |
 | [`14 · nrs3-uncertainty-cone`](https://github.com/naype888-cloud/nrs3-uncertainty-cone) | Cône de lumière futur et cercle de Minkowski : structure causale sous revêtement SL(2, ℂ) |
-| [`15 · lean4-commits`](https://github.com/naype888-cloud/lean4-commits) | 53 PRs fusionnées dans leanprover-community/physlib : catalogue de preuves formelles, 0 sorry, ZFC |
+| [`15 · lean4-commits`](https://github.com/naype888-cloud/lean4-commits) | 53 PRs fusionnées dans leanprover-community/physlib : catalogue de preuves formelles, `0 sorry`, ZFC |
 ---
 
 ## ⏱️ Chronologie
